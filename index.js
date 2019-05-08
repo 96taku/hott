@@ -2,6 +2,7 @@ const _ = require('underscore');
 const ffi = require('ffi');
 const ref = require('ref');
 const structType = require('ref-struct');
+const arch = require('os').arch;
 
 const WM_HOTKEY = 0x0312;
 const Modifiers = {
@@ -210,19 +211,37 @@ const Keys = {
 let hkId = 111111;
 const commands = {};
 
+// https://docs.microsoft.com/en-us/windows/desktop/api/windef/ns-windef-point
+// https://docs.microsoft.com/en-us/windows/desktop/WinProg/windows-data-types
 const Point = structType({
-	x: ref.types.int64,
-	y: ref.types.int64
+	x: ref.types.int32,
+	y: ref.types.int32
 });
 
-const Msg = structType({
-	hwnd: ref.types.int32,
-	message: ref.types.uint32,
-	wParam: ref.types.uint32,
-	lParam: ref.types.int32,
-	time: ref.types.uint32,
-	pt: Point
-});
+// https://docs.microsoft.com/en-us/windows/desktop/api/winuser/ns-winuser-msg
+// https://docs.microsoft.com/en-us/windows/desktop/WinProg/windows-data-types
+const Msg = (function (arch) {
+	if (arch === 'x64') {
+		return structType({
+			hwnd: ref.types.uint64,
+			message: ref.types.uint32,
+			wParam: ref.types.uint64,
+			lParam: ref.types.int64,
+			time: ref.types.uint32,
+			pt: Point
+		});
+	} else {
+		// TODO: Test this on 32bit machine
+		return structType({
+			hwnd: ref.types.uint32,
+			message: ref.types.uint32,
+			wParam: ref.types.uint32,
+			lParam: ref.types.int32,
+			time: ref.types.uint32,
+			pt: Point
+		});
+	}
+})(arch());
 
 const MsgPtr = ref.refType(Msg);
 
@@ -275,8 +294,9 @@ exports.monitorHotkeys = function (opts) {
 
 	const key = setInterval(() => {
 		winapi.PeekMessageA(msg.ref(), null, 0, 0, 1);
-		if (msg.wParam === WM_HOTKEY) {
-			reg = commands[msg.time];
+		// https://docs.microsoft.com/en-us/windows/desktop/inputdev/wm-hotkey
+		if (msg.message === WM_HOTKEY) {
+			reg = commands[msg.wParam];
 			if (reg && reg.cmd) {
 				cmd = reg.cmd;
 				cb = reg.cb;
@@ -289,7 +309,7 @@ exports.monitorHotkeys = function (opts) {
 			}
 
 			// Make sure we don't come back here till me actually get another message
-			msg.wParam = WM_HOTKEY + 1;
+			msg.message = WM_HOTKEY + 1;
 		}
 	}, opts.poll);
 
