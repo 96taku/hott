@@ -1,9 +1,15 @@
-## hott [![Build status](https://ci.appveyor.com/api/projects/status/aq35s86aavdjx6fl/branch/master?svg=true)](https://ci.appveyor.com/project/Lange/hott/branch/master)
+## hott <!--[![Build status](https://ci.appveyor.com/api/projects/status/aq35s86aavdjx6fl/branch/master?svg=true)](https://ci.appveyor.com/project/Lange/hott/branch/master)-->
 ##### Simple global hotkeys for Windows, with node
 
 ### Install
+<!--
 ```sh
 npm install --save lange/hott
+```
+-->
+```sh
+git clone https://github.com/96taku/hott /path/to/local-repo
+npm install /path/to/local-repo
 ```
 
 ### Programmatic usage
