@@ -230,17 +230,17 @@ const Msg = (function (arch) {
 			time: ref.types.uint32,
 			pt: Point
 		});
-	} else {
-		// TODO: Test this on 32bit machine
-		return structType({
-			hwnd: ref.types.uint32,
-			message: ref.types.uint32,
-			wParam: ref.types.uint32,
-			lParam: ref.types.int32,
-			time: ref.types.uint32,
-			pt: Point
-		});
 	}
+
+	// TODO: Test this on 32bit machine
+	return structType({
+		hwnd: ref.types.uint32,
+		message: ref.types.uint32,
+		wParam: ref.types.uint32,
+		lParam: ref.types.int32,
+		time: ref.types.uint32,
+		pt: Point
+	});
 })(arch());
 
 const MsgPtr = ref.refType(Msg);
